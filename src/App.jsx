@@ -94,8 +94,8 @@ export default function App() {
         if (todayData) setToday(JSON.parse(todayData));
       } catch {}
       const token = localStorage.getItem("whoop_token");
-      if (token) setWhoopToken(token);
-      const params = new URLSearchParams(window.location.search);
+      const storedToken = localStorage.getItem("whoop_token");
+if (storedToken) setWhoopToken(storedToken);
 const token = params.get("token");
 const refresh = params.get("refresh");
 const error = params.get("error");
