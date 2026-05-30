@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
 const CLIENT_ID = "525fe22b-c12a-4992-b3b5-b7b6e57572d9";
-const CLIENT_SECRET = "1ac1598af3c12cc235c66d986252e6659d582339b22407937b3f1fabb9e88969";
 const REDIRECT_URI = "https://drake-tracker.vercel.app/callback";
 
 const WHOOP_AVERAGES = {
@@ -93,56 +92,25 @@ export default function App() {
         const todayData = localStorage.getItem("today_" + getTodayKey());
         if (todayData) setToday(JSON.parse(todayData));
       } catch {}
-      const token = localStorage.getItem("whoop_token");
       const storedToken = localStorage.getItem("whoop_token");
-if (storedToken) setWhoopToken(storedToken);
-const token = params.get("token");
-const refresh = params.get("refresh");
-const error = params.get("error");
-
-if (token) {
-  localStorage.setItem("whoop_token", token);
-  localStorage.setItem("whoop_refresh", refresh);
-  setWhoopToken(token);
-  await fetchWhoopData(token);
-  window.history.replaceState({}, "", "/");
-}
-if (error) {
-  setWhoopError("WHOOP connection failed. Try again.");
-  window.history.replaceState({}, "", "/");
-}
-
+      if (storedToken) setWhoopToken(storedToken);
+      const params = new URLSearchParams(window.location.search);
+      const urlToken = params.get("token");
+      const urlRefresh = params.get("refresh");
+      const urlError = params.get("error");
+      if (urlToken) {
+        localStorage.setItem("whoop_token", urlToken);
+        localStorage.setItem("whoop_refresh", urlRefresh || "");
+        setWhoopToken(urlToken);
+        await fetchWhoopData(urlToken);
+        window.history.replaceState({}, "", "/");
+      }
+      if (urlError) {
+        setWhoopError("WHOOP connection failed. Try again.");
+        window.history.replaceState({}, "", "/");
+      }
     })();
   }, []);
-
-  async function exchangeCode(code) {
-    setWhoopLoading(true);
-    try {
-      const res = await fetch("https://api.prod.whoop.com/oauth/oauth2/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          grant_type: "authorization_code",
-          code,
-          client_id: CLIENT_ID,
-          client_secret: CLIENT_SECRET,
-          redirect_uri: REDIRECT_URI,
-        })
-      });
-      const data = await res.json();
-      if (data.access_token) {
-        localStorage.setItem("whoop_token", data.access_token);
-        localStorage.setItem("whoop_refresh", data.refresh_token);
-        setWhoopToken(data.access_token);
-        await fetchWhoopData(data.access_token);
-      } else {
-        setWhoopError("Auth failed. Try connecting again.");
-      }
-    } catch {
-      setWhoopError("Connection error. Try again.");
-    }
-    setWhoopLoading(false);
-  }
 
   async function fetchWhoopData(token) {
     setWhoopLoading(true);
