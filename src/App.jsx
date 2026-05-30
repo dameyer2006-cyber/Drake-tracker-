@@ -96,11 +96,22 @@ export default function App() {
       const token = localStorage.getItem("whoop_token");
       if (token) setWhoopToken(token);
       const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-      if (code) {
-        await exchangeCode(code);
-        window.history.replaceState({}, "", "/");
-      }
+const token = params.get("token");
+const refresh = params.get("refresh");
+const error = params.get("error");
+
+if (token) {
+  localStorage.setItem("whoop_token", token);
+  localStorage.setItem("whoop_refresh", refresh);
+  setWhoopToken(token);
+  await fetchWhoopData(token);
+  window.history.replaceState({}, "", "/");
+}
+if (error) {
+  setWhoopError("WHOOP connection failed. Try again.");
+  window.history.replaceState({}, "", "/");
+}
+
     })();
   }, []);
 
